@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"backendtest-go/dbinit"
 	"backendtest-go/models"
 	"fmt"
 	"net/http"
@@ -59,7 +58,7 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	var user models.User
-	dbinit.DB.Where("ID=?", claims["id"]).Find(&user)
+	models.DB.Where("ID=?", claims["id"]).Find(&user)
 
 	if user.ID == 0 {
 		c.AbortWithStatus(http.StatusUnauthorized)

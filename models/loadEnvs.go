@@ -1,4 +1,4 @@
-package dbinit
+package models
 
 import (
 	"log"

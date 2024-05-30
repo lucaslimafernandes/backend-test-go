@@ -2,11 +2,53 @@
 
 Create an API that serves as an cloud backup system
 
+## todo 
+
+folder controller
+
 ## Run
 
 ### Initialize DB postgres
 
     go run migrate/migrate.go
+
+## Project Structure
+
+```
+.
+├── controllers
+│   ├── authController.go       // Authentication controllers
+│   ├── fileController.go       // Controllers for file upload/download
+│   └── folderController.go     // Controllers for folder management
+├── dbinit
+│   ├── database.go             // Initialization and connection with the database
+│   └── loadEnvs.go             // Loading environment variables
+├── example_env                 // Example of environment variables file
+├── go.mod
+├── go.sum
+├── main.go                     // Entry point of the application
+├── middlewares
+│   ├── checkAuth.go            // Authentication middleware
+│   └── adminAuth.go            // Administrator authorization middleware (for Hard Mode)
+├── migrate
+│   └── migrate.go              // Database migration scripts
+├── models
+│   ├── authInput.go            // Models for authentication input data
+│   ├── user.go                 // User models
+│   ├── file.go                 // File models
+│   └── folder.go               // Folder models
+├── repositories
+│   ├── userRepository.go       // User repositories
+│   ├── fileRepository.go       // File repositories
+│   └── folderRepository.go     // Folder repositories
+├── services
+│   ├── authService.go          // Authentication business logic
+│   ├── fileService.go          // File business logic
+│   └── folderService.go        // Folder business logic
+├── README.md
+├── Dockerfile                  // Docker file to containerize the application
+└── docker-compose.yml          // docker-compose file to facilitate container management
+```
 
 
 

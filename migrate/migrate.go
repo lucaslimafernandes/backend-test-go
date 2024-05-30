@@ -1,19 +1,18 @@
 package main
 
 import (
-	"backendtest-go/dbinit"
 	"backendtest-go/models"
 )
 
 func init() {
 
-	dbinit.LoadEnvs()
-	dbinit.ConnectDB()
+	models.LoadEnvs()
+	models.ConnectDB()
 
 }
 
 func main() {
 
-	dbinit.DB.AutoMigrate(&models.User{})
+	models.DB.AutoMigrate(&models.User{}, &models.Folder{})
 
 }

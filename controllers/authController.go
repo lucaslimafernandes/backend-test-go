@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"backendtest-go/dbinit"
 	"backendtest-go/models"
 	"net/http"
 	"os"
@@ -23,7 +22,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	var userFound models.User
-	dbinit.DB.Where("email=?", authInput.Email).Find(&userFound)
+	models.DB.Where("email=?", authInput.Email).Find(&userFound)
 
 	if userFound.ID != 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email already used"})
@@ -42,7 +41,7 @@ func CreateUser(c *gin.Context) {
 		Password: string(passwordHash),
 	}
 
-	dbinit.DB.Create(&user)
+	models.DB.Create(&user)
 
 	c.JSON(http.StatusCreated, gin.H{"data": user})
 
@@ -59,7 +58,7 @@ func Login(c *gin.Context) {
 	}
 
 	var userFound models.User
-	dbinit.DB.Where("email=?", authInput.Email).Find(&userFound)
+	models.DB.Where("email=?", authInput.Email).Find(&userFound)
 	if userFound.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
 		return
@@ -92,3 +91,16 @@ func GetUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user})
 
 }
+
+func IsAuth(c *gin.Context) {
+	_, exist := c.Get("currentUser")
+	c.JSON(http.StatusOK, gin.H{"isauth": exist})
+}
+
+// func IsAuthStruct(c *gin.Context) models.User {
+// 	v, exist := c.Get("currentUser")
+// 	// c.JSON(http.StatusOK, gin.H{"isauth": exist})
+// 	// var u models.User
+
+// 	u, ok := v.(models.User)
+// }
