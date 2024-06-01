@@ -25,7 +25,11 @@ func main() {
 	router.GET("/user/profile", middlewares.CheckAuth, controllers.GetUserProfile)
 	router.GET("/user/isauth", middlewares.CheckAuth, controllers.IsAuth)
 
-	router.POST("/api/folder", middlewares.CheckAuth, controllers.CreateFolder)
+	router.GET("/api/v1/file", middlewares.CheckAuth, controllers.ListFiles)
+	router.GET("/api/v2/file", middlewares.CheckAuth, controllers.ListFilesV2)
+	router.GET("/api/v1/folder", middlewares.CheckAuth, controllers.ListFolders)
+	router.POST("/api/v1/file", middlewares.CheckAuth, controllers.FileUpload)
+	router.POST("/api/v1/folder", middlewares.CheckAuth, controllers.CreateFolder)
 
 	router.Run()
 

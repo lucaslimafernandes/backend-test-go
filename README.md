@@ -10,7 +10,23 @@ folder controller
 
 ### Initialize DB postgres
 
+    ```
     go run migrate/migrate.go
+
+    go run main.go
+    ```
+
+## Goals
+
+### Simple Mode
+
+- [x] Users can create an account with:
+   - [x] email address
+   - [x] password
+   - [x] full name
+- [x] Users can upload files up to 200mb - up to 50mb (supabase limit)
+- [ ] Users can download uploaded files
+- [ ] Users can create folders to hold files
 
 ## Project Structure
 

@@ -13,6 +13,11 @@ func init() {
 
 func main() {
 
-	models.DB.AutoMigrate(&models.User{}, &models.Folder{})
+	models.DB.AutoMigrate(
+		&models.User{},
+		&models.Folder{},
+		&models.File{},
+		&models.FileReview{},
+	)
 
 }
