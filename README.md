@@ -32,19 +32,19 @@ folder controller
 
 - [X] An admin user type for managing the content uploaded
 - [X] Admins can mark pictures and videos as unsafe
-- [] Unsafe files automatically get deleted
-- [] Users can stream videos and audio
+- [ ] Unsafe files automatically get deleted
+- [ ] Users can stream videos and audio
 
 ### Ultra Mode
 
-- [] Compression
-- [] File History
+- [ ] Compression
+- [ ] File History
 
 ## Extra featutes
 
-- [] RabbitMQ:
-    - [] New files notifications
-    - [] Queue to delete files
+- [ ] RabbitMQ:
+    - [ ] New files notifications
+    - [ ] Queue to delete files
 
 
 ## Project Structure
