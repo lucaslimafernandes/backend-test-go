@@ -28,6 +28,25 @@ folder controller
 - [x] Users can download uploaded files
 - [x] Users can create folders to hold files
 
+### Hard Mode
+
+- [X] An admin user type for managing the content uploaded
+- [X] Admins can mark pictures and videos as unsafe
+- [] Unsafe files automatically get deleted
+- [] Users can stream videos and audio
+
+### Ultra Mode
+
+- [] Compression
+- [] File History
+
+## Extra featutes
+
+- [] RabbitMQ:
+    - [] New files notifications
+    - [] Queue to delete files
+
+
 ## Project Structure
 
 ```

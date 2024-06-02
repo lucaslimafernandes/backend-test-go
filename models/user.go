@@ -8,4 +8,5 @@ type User struct {
 	Fullname  string `json:"fullname"`
 	Password  string `json:"password"`
 	CreatedAt time.Time
+	IsAdmin   bool `json:"isadmin" gorm:"default=false"`
 }

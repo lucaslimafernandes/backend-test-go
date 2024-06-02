@@ -31,6 +31,12 @@ type FileReview struct {
 	Unsafe     bool `json:"unsafe" gorm:"default=false"`
 }
 
+type FileReviewInput struct {
+	FileID     uint `json:"fileid" binding:"required"`
+	ReviewerId uint `json:"reviewerid" binding:"required"`
+	Unsafe     bool `json:"unsafe"  binding:"required"`
+}
+
 type FileList struct {
 	Folder string `json:"folder"`
 }

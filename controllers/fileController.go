@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"backendtest-go/models"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
+	"github.com/streadway/amqp"
 )
 
 func FileUpload(c *gin.Context) {
@@ -106,10 +108,24 @@ func FileUpload(c *gin.Context) {
 
 	models.DB.Create(&file)
 
+	message := fmt.Sprintf("New file: %s\nuser:%s\ndescription:%s\npath:%s\nurl:%s\n", file.File, file.UserEmail, file.Description, file.Folder, file.FileUrl)
+	err = models.RabbitMQChannel.Publish(
+		"",
+		models.NotifyQueue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(message),
+		},
+	)
+	if err != nil {
+		log.Println("RabbitMQ Error:", err)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": file})
 
 	// TODO
-	// list all paths, files
 	// verifications
 	// notify
 }
