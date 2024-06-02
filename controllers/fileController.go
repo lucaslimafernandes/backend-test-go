@@ -162,4 +162,16 @@ func ListFiles(c *gin.Context) {
 
 func ListFilesV2(c *gin.Context) {
 
+	var sl []models.File
+	var folderInput models.FileList
+
+	err := c.ShouldBindJSON(&folderInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	models.DB.Where("folder=? and unsafe=false", folderInput.Folder).Find(&sl)
+	c.JSON(http.StatusOK, gin.H{"data": sl})
+
 }

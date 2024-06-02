@@ -25,8 +25,8 @@ folder controller
    - [x] password
    - [x] full name
 - [x] Users can upload files up to 200mb - up to 50mb (supabase limit)
-- [ ] Users can download uploaded files
-- [ ] Users can create folders to hold files
+- [x] Users can download uploaded files
+- [x] Users can create folders to hold files
 
 ## Project Structure
 
