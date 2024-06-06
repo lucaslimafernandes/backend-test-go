@@ -4,6 +4,7 @@ import (
 	"backendtest-go/controllers"
 	"backendtest-go/middlewares"
 	"backendtest-go/models"
+	"backendtest-go/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,7 @@ func init() {
 
 	models.LoadEnvs()
 	models.ConnectDB()
+	models.RConn()
 
 }
 
@@ -30,6 +32,8 @@ func main() {
 	router.GET("/api/v1/folder", middlewares.CheckAuth, controllers.ListFolders)
 	router.POST("/api/v1/file", middlewares.CheckAuth, controllers.FileUpload)
 	router.POST("/api/v1/folder", middlewares.CheckAuth, controllers.CreateFolder)
+
+	router.POST("/api/v1/unsafe", middlewares.CheckAuth, services.MarkUnsafeAPI)
 
 	router.Run()
 

@@ -30,9 +30,9 @@ folder controller
 
 ### Hard Mode
 
-- [X] An admin user type for managing the content uploaded
-- [X] Admins can mark pictures and videos as unsafe
-- [ ] Unsafe files automatically get deleted
+- [x] An admin user type for managing the content uploaded
+- [x] Admins can mark pictures and videos as unsafe
+- [x] Unsafe files automatically get deleted
 - [ ] Users can stream videos and audio
 
 ### Ultra Mode

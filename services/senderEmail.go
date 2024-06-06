@@ -6,20 +6,23 @@ import (
 	"os"
 )
 
-func SendEmail() {
+func SendEmail(body []byte) {
 
 	auth := smtp.PlainAuth("", os.Getenv("SENDER_EMAIL"), os.Getenv("PASSWD_EMAIL"), os.Getenv("SMTPHOST"))
 
 	to := []string{os.Getenv("SENDER_EMAIL")}
 
-	msg := []byte("I dont know")
+	msg := "From: " + os.Getenv("SENDER_EMAIL") + "\n" +
+		"To: " + os.Getenv("SENDER_EMAIL") + "\n" +
+		"Subject: " + "SendEmail" + "\n\n" +
+		string(body)
 
 	err := smtp.SendMail(
-		os.Getenv("SMTPPORT"),
+		os.Getenv("SMTPHOST")+":"+os.Getenv("SMTPPORT"),
 		auth,
 		os.Getenv("SENDER_EMAIL"),
 		to,
-		msg,
+		[]byte(msg),
 	)
 
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 
 var RabbitMQChannel *amqp.Channel
 var NotifyQueue amqp.Queue
+var UnsafeQueue amqp.Queue
 
 func RConn() {
 
@@ -34,7 +35,20 @@ func RConn() {
 		log.Fatalln("Failed to declare a queue:", err)
 	}
 
+	u, err := ch.QueueDeclare(
+		"unsafe",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatalln("Failed to declare a queue:", err)
+	}
+
 	RabbitMQChannel = ch
 	NotifyQueue = q
+	UnsafeQueue = u
 
 }
