@@ -125,9 +125,6 @@ func FileUpload(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": file})
 
-	// TODO
-	// verifications
-	// notify
 }
 
 func ListFiles(c *gin.Context) {
@@ -140,8 +137,8 @@ func ListFiles(c *gin.Context) {
 	}
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(os.Getenv("S3_REGION")),   // Substitua pela sua região
-		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")), // Substitua pelo seu endpoint, se necessário
+		Region:      aws.String(os.Getenv("S3_REGION")),
+		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
 		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
 	})
 	if err != nil {
@@ -189,5 +186,76 @@ func ListFilesV2(c *gin.Context) {
 
 	models.DB.Where("folder=? and unsafe=false", folderInput.Folder).Find(&sl)
 	c.JSON(http.StatusOK, gin.H{"data": sl})
+
+}
+
+func StreamFile(c *gin.Context) {
+
+	// TODO:
+	// Stream history
+	// need to create a var to save in DB
+
+	var userInput models.StreamInput
+
+	err := c.ShouldBindHeader(&userInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	fileKey := c.Param("filekey")
+	rangeHeader := c.GetHeader("Range")
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(os.Getenv("S3_REGION")),
+		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	svc := s3.New(sess)
+
+	var input *s3.GetObjectInput
+	if rangeHeader != "" {
+		input = &s3.GetObjectInput{
+			Bucket: aws.String(os.Getenv("S3_BUCKET")),
+			Key:    aws.String(fileKey),
+			Range:  aws.String(rangeHeader),
+		}
+	} else {
+		input = &s3.GetObjectInput{
+			Bucket: aws.String(os.Getenv("S3_BUCKET")),
+			Key:    aws.String(fileKey),
+		}
+	}
+
+	res, err := svc.GetObject(input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get file"})
+		return
+	}
+	defer res.Body.Close()
+
+	// Set headers for streaming
+	c.Header("Content-Type", *res.ContentType)
+	c.Header("Content-Length", fmt.Sprintf("%d", *res.ContentLength))
+
+	if rangeHeader != "" {
+		c.Header("Accept-Ranges", "bytes")
+		c.Header("Content-Range", *res.ContentRange)
+		c.Status(http.StatusPartialContent)
+	} else {
+		c.Status(http.StatusOK)
+	}
+
+	// Response bopdy
+	_, err = c.Writer.Write([]byte(fmt.Sprintf("Content-Length: %d", *res.ContentLength)))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stream file to response"})
+		return
+	}
 
 }

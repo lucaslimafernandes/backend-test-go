@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type FileInput struct {
 	File        string `json:"file" binding:"required"`
@@ -39,4 +43,15 @@ type FileReviewInput struct {
 
 type FileList struct {
 	Folder string `json:"folder"`
+}
+
+type StreamInput struct {
+	UserID uint `json:"userid" binding:"required"`
+}
+
+type StreamHistory struct {
+	ID       uint      `json:"id" gorm:"primarykey"`
+	ViewedAt time.Time `json:"viewedat"`
+	FileID   uint      `json:"fileid"`
+	UserID   uint      `json:"userid"`
 }

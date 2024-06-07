@@ -18,6 +18,7 @@ func main() {
 		&models.Folder{},
 		&models.File{},
 		&models.FileReview{},
+		&models.StreamHistory{},
 	)
 
 }
