@@ -96,11 +96,3 @@ func IsAuth(c *gin.Context) {
 	_, exist := c.Get("currentUser")
 	c.JSON(http.StatusOK, gin.H{"isauth": exist})
 }
-
-// func IsAuthStruct(c *gin.Context) models.User {
-// 	v, exist := c.Get("currentUser")
-// 	// c.JSON(http.StatusOK, gin.H{"isauth": exist})
-// 	// var u models.User
-
-// 	u, ok := v.(models.User)
-// }

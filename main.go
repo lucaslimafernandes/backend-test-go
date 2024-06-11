@@ -36,6 +36,7 @@ func main() {
 	router.POST("/api/v1/unsafe", middlewares.CheckAuth, services.MarkUnsafeAPI)
 
 	router.GET("/stream/:filekey", middlewares.CheckAuth, controllers.StreamFile)
+	router.GET("/web/stream/", services.ServeHtmlStream)
 
 	router.Run()
 

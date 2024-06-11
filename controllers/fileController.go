@@ -9,7 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -24,14 +26,12 @@ func FileUpload(c *gin.Context) {
 	var fileInput models.FileInput
 	var uploadBody io.ReadSeeker
 
-	// err := c.ShouldBindJSON(&fileInput)
 	err := c.ShouldBindHeader(&fileInput)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// src := c.Request.Body
-	// upl, err := c.FormFile("file")
+
 	if c.Request.Body == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "no file is receveid"})
 		return
@@ -45,24 +45,60 @@ func FileUpload(c *gin.Context) {
 
 	compress := false
 	filename := aws.String(fileInput.Path + "/" + fileInput.File)
-	// Error file
+
 	if fileInput.Compress == "true" {
+
 		compress = true
 		filename = aws.String(fileInput.Path + "/" + fileInput.File + ".zip")
-		zipBuffer := new(bytes.Buffer)
-		zipWriter := zip.NewWriter(zipBuffer)
-		zipEntry, err := zipWriter.Create(fileInput.File)
-		if err != nil {
-			log.Println("err:", err)
-		}
-		defer zipWriter.Close()
 
-		_, err = io.Copy(zipEntry, bytes.NewReader(src))
+		// Read the request body into a buffer
+		buf := new(bytes.Buffer)
+		_, err := io.Copy(buf, c.Request.Body)
 		if err != nil {
-			log.Println("err:", err)
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file data"})
+			return
 		}
 
-		uploadBody = bytes.NewReader(zipBuffer.Bytes())
+		// Create a zip file
+		archive, err := os.Create(fileInput.File + ".zip")
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create zip archive"})
+			return
+		}
+
+		zipWriter := zip.NewWriter(archive)
+		w, err := zipWriter.Create(fileInput.File)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create zip entry"})
+			return
+		}
+
+		// Copy the buffer content to the zip entry
+		_, err = io.Copy(w, buf)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to copy file data to zip"})
+			return
+		}
+
+		// Reopen the zip file for reading
+		fz, err := os.Open(fileInput.File + ".zip")
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open zip file"})
+			return
+		}
+
+		// Use the zip file as the upload body
+		uploadBody = fz
+
+		fz.Close()
+		zipWriter.Close()
+		archive.Close()
+		_ = os.Remove(fileInput.File + ".zip")
 
 	} else {
 		uploadBody = bytes.NewReader(src)
@@ -82,16 +118,17 @@ func FileUpload(c *gin.Context) {
 	// Cria um novo cliente do S3
 	svc := s3.New(sess)
 
+	// FilePath:    fileInput.Path + "/" + fileInput.File,
 	file := models.File{
 		File:        fileInput.File,
 		Folder:      fileInput.Path,
-		FilePath:    fileInput.Path + "/" + fileInput.File,
+		FilePath:    *filename,
 		UserID:      fileInput.UserID,
 		UserEmail:   fileInput.UserEmail,
 		Description: fileInput.Description,
 		Compression: compress,
 		Unsafe:      false,
-		FileUrl:     os.Getenv("S3_FILEPOINT") + fileInput.Path + "/" + fileInput.File,
+		FileUrl:     os.Getenv("S3_FILEPOINT") + *filename,
 	}
 
 	uploadParams := &s3.PutObjectInput{
@@ -196,6 +233,8 @@ func StreamFile(c *gin.Context) {
 	// need to create a var to save in DB
 
 	var userInput models.StreamInput
+	var streamHistory models.StreamHistory
+	var file models.File
 
 	err := c.ShouldBindHeader(&userInput)
 	if err != nil {
@@ -205,6 +244,8 @@ func StreamFile(c *gin.Context) {
 
 	fileKey := c.Param("filekey")
 	rangeHeader := c.GetHeader("Range")
+
+	models.DB.Where("id=? and unsafe=false", fileKey).Find(&file)
 
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(os.Getenv("S3_REGION")),
@@ -222,7 +263,7 @@ func StreamFile(c *gin.Context) {
 	if rangeHeader != "" {
 		input = &s3.GetObjectInput{
 			Bucket: aws.String(os.Getenv("S3_BUCKET")),
-			Key:    aws.String(fileKey),
+			Key:    aws.String(file.FilePath),
 			Range:  aws.String(rangeHeader),
 		}
 	} else {
@@ -251,7 +292,16 @@ func StreamFile(c *gin.Context) {
 		c.Status(http.StatusOK)
 	}
 
-	// Response bopdy
+	fid, err := strconv.Atoi(fileKey)
+	if err != nil {
+		log.Println(err)
+	}
+	streamHistory.FileID = uint(fid)
+	streamHistory.UserID = userInput.UserID
+	streamHistory.ViewedAt = time.Now()
+	models.DB.Create(&streamHistory)
+
+	// Response body
 	_, err = c.Writer.Write([]byte(fmt.Sprintf("Content-Length: %d", *res.ContentLength)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stream file to response"})

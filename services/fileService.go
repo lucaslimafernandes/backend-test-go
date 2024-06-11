@@ -81,6 +81,7 @@ func DeleteFile(msg []byte) {
 	var file models.File
 	models.DB.Where("id = ?", fileID).Find(&file)
 	file.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	file.Unsafe = true
 
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(os.Getenv("S3_REGION")),
@@ -111,4 +112,55 @@ func DeleteFile(msg []byte) {
 
 	models.DB.Save(&file)
 
+}
+
+func ServeHtmlStream(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.WriteHeader(http.StatusOK)
+	c.Writer.Write([]byte(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Interactive Video Stream Test</title>
+        </head>
+        <body>
+            <h1>Interactive Video Stream Test</h1>
+            <video id="videoPlayer" width="640" height="480" controls></video>
+            <script>
+                async function loadVideo() {
+                    const video = document.getElementById('videoPlayer');
+                    const url = '/stream/12';
+                    const headers = new Headers({
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTgxMDU2NDYsImlkIjo0fQ.3ezFPcz-defjUfHQ8_v3zbp8eSiQcqShCn1xFtQOEHI',
+                        'UserID': '4',
+						'Range': 'bytes=0-1023'
+                    });
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: headers,
+                            mode: 'cors'
+                        });
+
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            const videoUrl = URL.createObjectURL(blob);
+                            video.src = videoUrl;
+                            video.play();
+                        } else {
+                            console.error('Failed to load video:', response.status, response.statusText);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching video:', error);
+                    }
+                }
+
+                loadVideo();
+            </script>
+        </body>
+        </html>
+    `))
 }

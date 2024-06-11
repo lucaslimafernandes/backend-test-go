@@ -1,20 +1,23 @@
 # Backend Engineer Test
 
-Create an API that serves as an cloud backup system
-
-## todo 
-
-folder controller
+An API that serves as an cloud backup system
 
 ## Run
 
-### Initialize DB postgres
+You need a Postgres, RabbitMQ and a Gmail email account.
+
+### Go
 
     ```
     go run migrate/migrate.go
 
     go run main.go
+
+    go run services/rb/services.go
     ```
+
+**Note**: Execute main.go and services.go concurrently
+
 
 ## Goals
 
@@ -33,18 +36,18 @@ folder controller
 - [x] An admin user type for managing the content uploaded
 - [x] Admins can mark pictures and videos as unsafe
 - [x] Unsafe files automatically get deleted
-- [ ] Users can stream videos and audio
+- [x] Users can stream videos and audio
 
 ### Ultra Mode
 
-- [ ] Compression
-- [ ] File History
+- [x] Compression
+- [x] File History
 
 ## Extra featutes
 
-- [ ] RabbitMQ:
-    - [ ] New files notifications
-    - [ ] Queue to delete files
+- [x] RabbitMQ:
+    - [x] New files notifications
+    - [x] Queue to delete files
 
 
 ## Project Structure
@@ -55,29 +58,27 @@ folder controller
 │   ├── authController.go       // Authentication controllers
 │   ├── fileController.go       // Controllers for file upload/download
 │   └── folderController.go     // Controllers for folder management
-├── dbinit
-│   ├── database.go             // Initialization and connection with the database
-│   └── loadEnvs.go             // Loading environment variables
 ├── example_env                 // Example of environment variables file
 ├── go.mod
 ├── go.sum
 ├── main.go                     // Entry point of the application
 ├── middlewares
-│   ├── checkAuth.go            // Authentication middleware
-│   └── adminAuth.go            // Administrator authorization middleware (for Hard Mode)
+│   ├── adminAuth.go            // Administrator authorization middleware (for Hard Mode)
+│   └── checkAuth.go            // Authentication middleware
 ├── migrate
 │   └── migrate.go              // Database migration scripts
 ├── models
 │   ├── authInput.go            // Models for authentication input data
-│   ├── user.go                 // User models
+│   ├── database.go             // Initialization and connection with the database
 │   ├── file.go                 // File models
-│   └── folder.go               // Folder models
-├── repositories
-│   ├── userRepository.go       // User repositories
-│   ├── fileRepository.go       // File repositories
-│   └── folderRepository.go     // Folder repositories
+│   ├── folder.go               // Folder models
+│   ├── loadEnvs.go             // Loading environment variables
+│   ├── queue.go                // Initialization and connection with the RabbitMQ
+│   └── user.go                 // User models
+
 ├── services
-│   ├── authService.go          // Authentication business logic
+│   └── rb                      
+│   │  └── services             // Notify and Delete queues
 │   ├── fileService.go          // File business logic
 │   └── folderService.go        // Folder business logic
 ├── README.md
