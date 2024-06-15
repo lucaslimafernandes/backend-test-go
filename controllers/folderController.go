@@ -33,8 +33,8 @@ func CreateFolder(c *gin.Context) {
 	}
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(os.Getenv("S3_REGION")),   // Substitua pela sua região
-		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")), // Substitua pelo seu endpoint, se necessário
+		Region:      aws.String(os.Getenv("S3_REGION")),
+		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
 		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
 	})
 
