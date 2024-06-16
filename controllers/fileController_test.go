@@ -13,6 +13,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+
+	models.LoadEnvs()
+	models.ConnectDB()
+	models.RConn()
+
+}
+
 func TestFileUpload(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
