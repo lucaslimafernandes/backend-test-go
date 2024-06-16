@@ -53,8 +53,8 @@ func CreateFolder(c *gin.Context) {
 	}
 
 	uploadParams := &s3.PutObjectInput{
-		Bucket: aws.String(os.Getenv("S3_BUCKET")),   // Substitua pelo nome do seu bucket
-		Key:    aws.String(folderInput.Folder + "/"), // Substitua pelo nome que você deseja dar à imagem no S3
+		Bucket: aws.String(os.Getenv("S3_BUCKET")),
+		Key:    aws.String(folderInput.Folder + "/"),
 		Body:   nil,
 	}
 
@@ -73,8 +73,8 @@ func CreateFolder(c *gin.Context) {
 func ListFolders(c *gin.Context) {
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(os.Getenv("S3_REGION")),   // Substitua pela sua região
-		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")), // Substitua pelo seu endpoint, se necessário
+		Region:      aws.String(os.Getenv("S3_REGION")),
+		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
 		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
 	})
 	if err != nil {
