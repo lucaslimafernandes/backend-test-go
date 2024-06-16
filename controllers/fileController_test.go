@@ -57,9 +57,51 @@ func TestFileUpload(t *testing.T) {
 
 }
 
-func TestListFiles(t *testing.T) {}
+func TestListFiles(t *testing.T) {
 
-func TestListFilesV2(t *testing.T) {}
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	router.GET("/api/v1/file", ListFiles)
+
+	folder := models.FileList{
+		Folder: "Testing",
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/v1/file", bytes.NewBuffer([]byte("")))
+	req.Header.Set("folder", folder.Folder)
+
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Error("Expected:", http.StatusOK, "Got:", resp.Code)
+	}
+
+}
+
+func TestListFilesV2(t *testing.T) {
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	router.GET("/api/v2/file", ListFiles)
+
+	folder := models.FileList{
+		Folder: "Testing",
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/v2/file", bytes.NewBuffer([]byte("")))
+	req.Header.Set("folder", folder.Folder)
+
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Error("Expected:", http.StatusOK, "Got:", resp.Code)
+	}
+
+}
 
 func TestStreamFile(t *testing.T) {}
 
