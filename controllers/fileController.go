@@ -228,10 +228,6 @@ func ListFilesV2(c *gin.Context) {
 
 func StreamFile(c *gin.Context) {
 
-	// TODO:
-	// Stream history
-	// need to create a var to save in DB
-
 	var userInput models.StreamInput
 	var streamHistory models.StreamHistory
 	var file models.File
