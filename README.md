@@ -55,35 +55,37 @@ You need a Postgres, RabbitMQ and a Gmail email account.
 ```
 .
 ├── controllers
-│   ├── authController.go       // Authentication controllers
-│   ├── fileController.go       // Controllers for file upload/download
-│   └── folderController.go     // Controllers for folder management
-├── example_env                 // Example of environment variables file
+│   ├── authController.go           // Authentication controllers
+|   ├── authController_test.go      // Test for authentication controllers
+│   ├── fileController.go           // Controllers for file upload/download
+|   ├── fileController_test.go      // Test for file controllers
+│   ├── folderController.go         // Controllers for folder management
+|   └── folderControler_test.go     // Test for folder controllers
+├── example_env                     // Example of environment variables file
 ├── go.mod
 ├── go.sum
-├── main.go                     // Entry point of the application
+├── main.go                         // Entry point of the application
 ├── middlewares
-│   ├── adminAuth.go            // Administrator authorization middleware (for Hard Mode)
-│   └── checkAuth.go            // Authentication middleware
+│   └── checkAuth.go                // Authentication middleware
 ├── migrate
-│   └── migrate.go              // Database migration scripts
+│   └── migrate.go                  // Database migration scripts
 ├── models
-│   ├── authInput.go            // Models for authentication input data
-│   ├── database.go             // Initialization and connection with the database
-│   ├── file.go                 // File models
-│   ├── folder.go               // Folder models
-│   ├── loadEnvs.go             // Loading environment variables
-│   ├── queue.go                // Initialization and connection with the RabbitMQ
-│   └── user.go                 // User models
+│   ├── authInput.go                // Models for authentication input data
+│   ├── database.go                 // Initialization and connection with the database
+│   ├── file.go                     // File models
+│   ├── folder.go                   // Folder models
+│   ├── loadEnvs.go                 // Loading environment variables
+│   ├── queue.go                    // Initialization and connection with the RabbitMQ
+│   └── user.go                     // User models
 
 ├── services
 │   └── rb                      
-│   │  └── services             // Notify and Delete queues
-│   ├── fileService.go          // File business logic
-│   └── folderService.go        // Folder business logic
+│   │  └── services                 // Notify and Delete queues
+│   ├── fileService.go              // File business logic
+│   └── folderService.go            // Folder business logic
 ├── README.md
-├── Dockerfile                  // Docker file to containerize the application
-└── docker-compose.yml          // docker-compose file to facilitate container management
+├── Dockerfile                      // Docker file to containerize the application
+└── docker-compose.yml              // docker-compose file to facilitate container management
 ```
 
 

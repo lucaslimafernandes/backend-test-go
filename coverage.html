@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>controllers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">backendtest-go/controllers/authController.go (77.5%)</option>
+				
+				<option value="file1">backendtest-go/controllers/fileController.go (53.1%)</option>
+				
+				<option value="file2">backendtest-go/controllers/folderController.go (74.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package controllers
+
+import (
+        "backendtest-go/models"
+        "net/http"
+        "os"
+        "time"
+
+        "github.com/gin-gonic/gin"
+        "github.com/golang-jwt/jwt/v4"
+        "golang.org/x/crypto/bcrypt"
+)
+
+func CreateUser(c *gin.Context) <span class="cov8" title="1">{
+
+        var authInput models.AuthInput
+
+        err := c.ShouldBindJSON(&amp;authInput)
+        if err != nil </span><span class="cov8" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var userFound models.User
+        models.DB.Where("email=?", authInput.Email).Find(&amp;userFound)
+
+        if userFound.ID != 0 </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "email already used"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">passwordHash, err := bcrypt.GenerateFromPassword([]byte(authInput.Password), bcrypt.DefaultCost)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">user := models.User{
+                Email:    authInput.Email,
+                Fullname: authInput.Fullname,
+                Password: string(passwordHash),
+        }
+
+        models.DB.Create(&amp;user)
+
+        c.JSON(http.StatusCreated, gin.H{"data": user})</span>
+
+}
+
+func Login(c *gin.Context) <span class="cov8" title="1">{
+
+        var authInput models.AuthInput
+
+        err := c.ShouldBindJSON(&amp;authInput)
+        if err != nil </span><span class="cov8" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var userFound models.User
+        models.DB.Where("email=?", authInput.Email).Find(&amp;userFound)
+        if userFound.ID == 0 </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(authInput.Password))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "invalid password"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+                "id":  userFound.ID,
+                "exp": time.Now().Add(time.Hour * 24).Unix(),
+        })
+
+        token, err := generateToken.SignedString([]byte(os.Getenv("SECRET")))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
+        }</span>
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"token": token})</span>
+
+}
+
+func GetUserProfile(c *gin.Context) <span class="cov8" title="1">{
+        user, _ := c.Get("currentUser")
+        c.JSON(http.StatusOK, gin.H{"user": user})
+}</span>
+
+func IsAuth(c *gin.Context) <span class="cov8" title="1">{
+        _, exist := c.Get("currentUser")
+        c.JSON(http.StatusOK, gin.H{"isauth": exist})
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package controllers
+
+import (
+        "archive/zip"
+        "backendtest-go/models"
+        "bytes"
+        "fmt"
+        "io"
+        "log"
+        "net/http"
+        "os"
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/aws/aws-sdk-go/aws"
+        "github.com/aws/aws-sdk-go/aws/credentials"
+        "github.com/aws/aws-sdk-go/aws/session"
+        "github.com/aws/aws-sdk-go/service/s3"
+        "github.com/gin-gonic/gin"
+        "github.com/streadway/amqp"
+)
+
+func FileUpload(c *gin.Context) <span class="cov8" title="1">{
+
+        var fileInput models.FileInput
+        var uploadBody io.ReadSeeker
+
+        err := c.ShouldBindHeader(&amp;fileInput)
+        if err != nil </span><span class="cov8" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">if c.Request.Body == nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "no file is receveid"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">src, err := io.ReadAll(c.Request.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to read the file"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">compress := false
+        filename := aws.String(fileInput.Path + "/" + fileInput.File)
+
+        if fileInput.Compress == "true" </span><span class="cov0" title="0">{
+
+                compress = true
+                filename = aws.String(fileInput.Path + "/" + fileInput.File + ".zip")
+
+                // Read the request body into a buffer
+                buf := new(bytes.Buffer)
+                _, err := io.Copy(buf, c.Request.Body)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Println(err)
+                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file data"})
+                        return
+                }</span>
+
+                // Create a zip file
+                <span class="cov0" title="0">archive, err := os.Create(fileInput.File + ".zip")
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Println(err)
+                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create zip archive"})
+                        return
+                }</span>
+
+                <span class="cov0" title="0">zipWriter := zip.NewWriter(archive)
+                w, err := zipWriter.Create(fileInput.File)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Println(err)
+                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create zip entry"})
+                        return
+                }</span>
+
+                // Copy the buffer content to the zip entry
+                <span class="cov0" title="0">_, err = io.Copy(w, buf)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Println(err)
+                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to copy file data to zip"})
+                        return
+                }</span>
+
+                // Reopen the zip file for reading
+                <span class="cov0" title="0">fz, err := os.Open(fileInput.File + ".zip")
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Println(err)
+                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open zip file"})
+                        return
+                }</span>
+
+                // Use the zip file as the upload body
+                <span class="cov0" title="0">uploadBody = fz
+
+                fz.Close()
+                zipWriter.Close()
+                archive.Close()
+                _ = os.Remove(fileInput.File + ".zip")</span>
+
+        } else<span class="cov8" title="1"> {
+                uploadBody = bytes.NewReader(src)
+        }</span>
+
+        <span class="cov8" title="1">sess, err := session.NewSession(&amp;aws.Config{
+                Region:      aws.String(os.Getenv("S3_REGION")),
+                Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+                Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        // Cria um novo cliente do S3
+        <span class="cov8" title="1">svc := s3.New(sess)
+
+        // FilePath:    fileInput.Path + "/" + fileInput.File,
+        file := models.File{
+                File:        fileInput.File,
+                Folder:      fileInput.Path,
+                FilePath:    *filename,
+                UserID:      fileInput.UserID,
+                UserEmail:   fileInput.UserEmail,
+                Description: fileInput.Description,
+                Compression: compress,
+                Unsafe:      false,
+                FileUrl:     os.Getenv("S3_FILEPOINT") + *filename,
+        }
+
+        uploadParams := &amp;s3.PutObjectInput{
+                Bucket: aws.String(os.Getenv("S3_BUCKET")),
+                Key:    filename,
+                Body:   uploadBody,
+        }
+
+        _, err = svc.PutObject(uploadParams)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">models.DB.Create(&amp;file)
+
+        message := fmt.Sprintf("New file: %s\nuser:%s\ndescription:%s\npath:%s\nurl:%s\n", file.File, file.UserEmail, file.Description, file.Folder, file.FileUrl)
+        err = models.RabbitMQChannel.Publish(
+                "",
+                models.NotifyQueue.Name,
+                false,
+                false,
+                amqp.Publishing{
+                        ContentType: "text/plain",
+                        Body:        []byte(message),
+                },
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("RabbitMQ Error:", err)
+        }</span>
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"data": file})</span>
+
+}
+
+func ListFiles(c *gin.Context) <span class="cov8" title="1">{
+
+        var folder models.FileList
+        err := c.ShouldBindHeader(&amp;folder)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">sess, err := session.NewSession(&amp;aws.Config{
+                Region:      aws.String(os.Getenv("S3_REGION")),
+                Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+                Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">svc := s3.New(sess)
+        res, err := svc.ListObjects(&amp;s3.ListObjectsInput{Bucket: aws.String("bt"), Prefix: aws.String(folder.Folder + "/")})
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var files []string
+        var _text string
+        for _, v := range res.Contents </span><span class="cov8" title="1">{
+                strPtr := v.Key
+                s0 := strings.Index(*v.Key, "/")
+                if s0 != -1 </span><span class="cov8" title="1">{
+                        _text = (*strPtr)[s0+1:]
+                }</span> else<span class="cov0" title="0"> {
+                        _text = *strPtr
+                }</span>
+                <span class="cov8" title="1">if _text != ".emptyFolderPlaceholder" </span><span class="cov8" title="1">{
+                        files = append(files, _text)
+                }</span>
+
+        }
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"files": files})</span>
+
+}
+
+func ListFilesV2(c *gin.Context) <span class="cov0" title="0">{
+
+        var sl []models.File
+        var folderInput models.FileList
+
+        err := c.ShouldBindJSON(&amp;folderInput)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov0" title="0">models.DB.Where("folder=? and unsafe=false", folderInput.Folder).Find(&amp;sl)
+        c.JSON(http.StatusOK, gin.H{"data": sl})</span>
+
+}
+
+func StreamFile(c *gin.Context) <span class="cov8" title="1">{
+
+        var userInput models.StreamInput
+        var streamHistory models.StreamHistory
+        var file models.File
+
+        err := c.ShouldBindHeader(&amp;userInput)
+        if err != nil </span><span class="cov8" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">fileKey := c.Param("filekey")
+        rangeHeader := c.GetHeader("Range")
+
+        models.DB.Where("id=? and unsafe=false", fileKey).Find(&amp;file)
+
+        sess, err := session.NewSession(&amp;aws.Config{
+                Region:      aws.String(os.Getenv("S3_REGION")),
+                Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+                Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">svc := s3.New(sess)
+
+        var input *s3.GetObjectInput
+        if rangeHeader != "" </span><span class="cov8" title="1">{
+                input = &amp;s3.GetObjectInput{
+                        Bucket: aws.String(os.Getenv("S3_BUCKET")),
+                        Key:    aws.String(file.FilePath),
+                        Range:  aws.String(rangeHeader),
+                }
+        }</span> else<span class="cov0" title="0"> {
+                input = &amp;s3.GetObjectInput{
+                        Bucket: aws.String(os.Getenv("S3_BUCKET")),
+                        Key:    aws.String(fileKey),
+                }
+        }</span>
+
+        <span class="cov8" title="1">res, err := svc.GetObject(input)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get file"})
+                return
+        }</span>
+        <span class="cov8" title="1">defer res.Body.Close()
+
+        // Set headers for streaming
+        c.Header("Content-Type", *res.ContentType)
+        c.Header("Content-Length", fmt.Sprintf("%d", *res.ContentLength))
+
+        if rangeHeader != "" </span><span class="cov8" title="1">{
+                c.Header("Accept-Ranges", "bytes")
+                c.Header("Content-Range", *res.ContentRange)
+                c.Status(http.StatusPartialContent)
+        }</span> else<span class="cov0" title="0"> {
+                c.Status(http.StatusOK)
+        }</span>
+
+        <span class="cov8" title="1">fid, err := strconv.Atoi(fileKey)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println(err)
+        }</span>
+        <span class="cov8" title="1">streamHistory.FileID = uint(fid)
+        streamHistory.UserID = userInput.UserID
+        streamHistory.ViewedAt = time.Now()
+        models.DB.Create(&amp;streamHistory)
+
+        // Response body
+        _, err = c.Writer.Write([]byte(fmt.Sprintf("Content-Length: %d", *res.ContentLength)))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stream file to response"})
+                return
+        }</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package controllers
+
+import (
+        "backendtest-go/models"
+        "net/http"
+        "os"
+        "slices"
+        "strings"
+
+        "github.com/aws/aws-sdk-go/aws"
+        "github.com/aws/aws-sdk-go/aws/credentials"
+        "github.com/aws/aws-sdk-go/aws/session"
+        "github.com/aws/aws-sdk-go/service/s3"
+        "github.com/gin-gonic/gin"
+)
+
+func CreateFolder(c *gin.Context) <span class="cov8" title="1">{
+
+        var folderInput models.FolderInput
+
+        err := c.ShouldBindJSON(&amp;folderInput)
+        if err != nil </span><span class="cov8" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var folderFound models.Folder
+        models.DB.Where("folder=?", folderInput.Folder).Find(&amp;folderFound)
+
+        if folderFound.ID != 0 </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "this folder already exists"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">sess, err := session.NewSession(&amp;aws.Config{
+                Region:      aws.String(os.Getenv("S3_REGION")),
+                Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+                Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        // Cria um novo cliente do S3
+        <span class="cov8" title="1">svc := s3.New(sess)
+
+        folder := models.Folder{
+                Folder:    folderInput.Folder,
+                UserID:    folderInput.UserID,
+                UserEmail: folderInput.UserEmail,
+        }
+
+        uploadParams := &amp;s3.PutObjectInput{
+                Bucket: aws.String(os.Getenv("S3_BUCKET")),
+                Key:    aws.String(folderInput.Folder + "/"),
+                Body:   nil,
+        }
+
+        // Faz o upload da imagem
+        _, err = svc.PutObject(uploadParams)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">models.DB.Create(&amp;folder)
+
+        c.JSON(http.StatusOK, gin.H{"ok": folder})</span>
+
+}
+
+func ListFolders(c *gin.Context) <span class="cov8" title="1">{
+
+        sess, err := session.NewSession(&amp;aws.Config{
+                Region:      aws.String(os.Getenv("S3_REGION")),
+                Endpoint:    aws.String(os.Getenv("S3_ENDPOINT")),
+                Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_ACCESS_KEY"), ""),
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">svc := s3.New(sess)
+        res, err := svc.ListObjects(&amp;s3.ListObjectsInput{Bucket: aws.String("bt")})
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var folders []string
+        var _text string
+        for _, v := range res.Contents </span><span class="cov8" title="1">{
+                strPtr := v.Key
+                s0 := strings.Index(*v.Key, "/")
+                if s0 != -1 </span><span class="cov8" title="1">{
+                        _text = (*strPtr)[:s0]
+                }</span> else<span class="cov0" title="0"> {
+                        _text = *strPtr
+                }</span>
+                <span class="cov8" title="1">if !slices.Contains(folders, _text) </span><span class="cov8" title="1">{
+                        folders = append(folders, _text)
+                }</span>
+
+        }
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"folders": folders})</span>
+
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

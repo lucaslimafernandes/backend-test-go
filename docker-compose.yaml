@@ -13,6 +13,34 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  go_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_app
+    depends_on:
+      - rabbit
+      - postgres
+    ports:
+      - "8080:8080"  # Altere esta porta conforme necessário
+    environment:
+      DATABASE_URL: postgres://user:password@postgres:5432/mydatabase
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+    volumes:
+      - ./app:/app
+
 volumes:
   rabbitmq_data:
-
+  postgres_data:
