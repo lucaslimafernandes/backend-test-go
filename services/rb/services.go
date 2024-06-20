@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.LoadEnvs()
+	// models.LoadEnvs()
 	models.RConn()
 }
 

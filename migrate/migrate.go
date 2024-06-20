@@ -1,4 +1,4 @@
-package main
+package migrate
 
 import (
 	"backendtest-go/models"
@@ -6,12 +6,12 @@ import (
 
 func init() {
 
-	models.LoadEnvs()
+	// models.LoadEnvs()
 	models.ConnectDB()
 
 }
 
-func main() {
+func Migrate() {
 
 	models.DB.AutoMigrate(
 		&models.User{},

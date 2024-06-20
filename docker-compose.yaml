@@ -1,29 +1,64 @@
 version: '3.9'
 
 services:
-  rabbit:
+  rabbitmq:
     image: rabbitmq:3.12.14-alpine
     container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 3
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks: 
+      - go_develop
 
-  postgres:
+  # Não consegui linkar dentro do container
+  # localstack:
+  #   container_name: localstack
+  #   image: localstack/localstack
+  #   ports:
+  #     - "4566:4566"  # LocalStack Gateway
+  #     - "4510-4559:4510-4559"  # external services port range
+  #   environment:
+  #     - DEBUG=${DEBUG:-0}
+  #     - SERVICES=s3
+  #   networks: 
+  #     - go_develop
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:4566/_localstack/health || exit 1"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   volumes:
+  #     - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+
+  db:
     image: postgres:14-alpine
-    container_name: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    shm_size: 128mb
+    container_name: db
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    networks: 
+      - go_develop
 
   go_app:
     build:
@@ -31,16 +66,36 @@ services:
       dockerfile: Dockerfile
     container_name: go_app
     depends_on:
-      - rabbit
-      - postgres
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
-      - "8080:8080"  # Altere esta porta conforme necessário
+      - "3000:3000"
     environment:
-      DATABASE_URL: postgres://user:password@postgres:5432/mydatabase
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      PORT: 3000
+      DB_URL: user=postgres password=password host=db port=5432 dbname=postgres
+      SECRET: auth-api-jwt-secret
+      S3_BUCKET: ${S3_BUCKET}
+      S3_REGION: ${S3_REGION}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_FILEPOINT: ${S3_FILEPOINT}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID} 
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      RABBITMQ_HOST: amqp://user:password@rabbitmq:5672/
+      SMTPHOST: ${SMTPHOST}
+      SMTPPORT: ${SMTPPORT}
+      SENDER_EMAIL: ${SENDER_EMAIL}
+      PASSWD_EMAIL: ${PASSWD_EMAIL}
     volumes:
       - ./app:/app
+    networks: 
+      - go_develop
 
 volumes:
   rabbitmq_data:
-  postgres_data:
+  db-data:
+
+networks:
+  go_develop:
+    driver: bridge

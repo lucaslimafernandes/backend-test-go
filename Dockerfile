@@ -5,12 +5,13 @@ FROM golang:1.22 AS builder
 WORKDIR /app
 
 # Copia os arquivos do projeto para o contêiner
-COPY main.go .
-COPY services/rb/services.go ./services/rb/
+# COPY main.go .
+# COPY services/rb/services.go ./services/rb/
+COPY . .
 
 # Compila os binários
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/main main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/services ./services/rb/services.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/main 
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/services 
 
 # Etapa final
 FROM alpine:latest

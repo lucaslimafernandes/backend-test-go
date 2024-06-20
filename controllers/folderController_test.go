@@ -29,7 +29,7 @@ func TestCreateFolder(t *testing.T) {
 
 	folderInput := models.FolderInput{
 		Folder:    "Testing",
-		UserID:    16,
+		UserID:    3,
 		UserEmail: "test@test.com",
 	}
 
@@ -76,7 +76,7 @@ func BenchmarkCreateFolder(b *testing.B) {
 
 		folderInput := models.FolderInput{
 			Folder:    fmt.Sprintf("Testing%v", i),
-			UserID:    16,
+			UserID:    3,
 			UserEmail: "test@test.com",
 		}
 

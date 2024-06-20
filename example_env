@@ -1,3 +1,14 @@
 PORT=3000
 DB_URL="host=localhost user= password= dbname= port=5432 sslmode=disable"
 SECRET=auth-api-jwt-secret
+S3_BUCKET=bt
+S3_REGION=sa-east-1
+S3_ENDPOINT=
+S3_FILEPOINT=
+S3_ACCESS_KEY_ID=
+S3_ACCESS_KEY=
+RABBITMQ_HOST=amqp://user:password@localhost:5672/
+SMTPHOST=smtp.gmail.com
+SMTPPORT=587
+SENDER_EMAIL=
+PASSWD_EMAIL=

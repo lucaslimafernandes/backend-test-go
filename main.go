@@ -3,6 +3,7 @@ package main
 import (
 	"backendtest-go/controllers"
 	"backendtest-go/middlewares"
+	"backendtest-go/migrate"
 	"backendtest-go/models"
 	"backendtest-go/services"
 
@@ -11,9 +12,9 @@ import (
 
 func init() {
 
-	models.LoadEnvs()
 	models.ConnectDB()
 	models.RConn()
+	migrate.Migrate()
 
 }
 
